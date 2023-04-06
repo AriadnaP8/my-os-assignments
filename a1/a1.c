@@ -123,6 +123,7 @@ void parsat(char *path)
     if(fd == -1)
     {
         perror("Nu s-a putut deschide fisierul.");
+        close(fd);
         return;
     }
     lseek(fd, 0, SEEK_SET);
@@ -131,6 +132,7 @@ void parsat(char *path)
     if(read(fd, &magic, 1) != 1 || magic != '8')
     {
         printf("ERROR\nwrong magic\n");
+        close(fd);
         return;
     }
     int headerSize = 0;
@@ -140,6 +142,7 @@ void parsat(char *path)
     if(read(fd, &version, 1) != 1 || (version < 109 || version > 213))
     {
         printf("ERROR\nwrong version\n");
+        close(fd);
         return;
     }
     // numarul de sectiuni
@@ -147,6 +150,7 @@ void parsat(char *path)
     if(read(fd, &nbOfSections, 1) != 1 || (nbOfSections < 3 || nbOfSections > 18))
     {
         printf("ERROR\nwrong sect_nr\n");
+        close(fd);
         return;
     }
 
@@ -170,6 +174,7 @@ void parsat(char *path)
         if(v[i].type != 61 && v[i].type != 65 && v[i].type != 69 && v[i].type != 58)
         {
             printf("ERROR\nwrong sect_types\n");
+            close(fd);
             return;
         }
         read(fd, &v[i].offset, 4);
@@ -181,6 +186,8 @@ void parsat(char *path)
     {
         printf("section%d: %s %d %d\n", i, v[i].name, v[i].type, v[i].size);
     }
+
+    close(fd);
 }
 
 int main(int argc, char **argv)

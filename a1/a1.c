@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-void listRec(const char *path, int size, char * name)
+void listRec(const char *path, int size, char * name, int are_num)
 {
     DIR *dir = NULL;
     struct dirent *entry = NULL;
@@ -26,19 +26,29 @@ void listRec(const char *path, int size, char * name)
             snprintf(fullPath, 512, "%s/%s", path, entry->d_name);
             if (lstat(fullPath, &statbuf) == 0)
             {
-                if(statbuf.st_size > size)
+                if((statbuf.st_size > size && size != -8))
                 {
-                    printf("%s\n", fullPath);
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                        printf("%s\n", fullPath);
+                    else 
+                    if( are_num == 1)
+                    
+                        printf("%s\n", fullPath);
+                    }
+                else 
+                if( size == -8)
+                {
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                        printf("%s\n", fullPath);
+                    else 
+                    if( are_num == 1)
+                        printf("%s\n", fullPath);
                 }
 
-                if(strcmp(entry->d_name, name) == 0)
-                {
-                    printf("%s\n", fullPath);
-                }
 
                 if (S_ISDIR(statbuf.st_mode))
                 {
-                    listRec(fullPath, size, name);
+                    listRec(fullPath, size, name, are_num);
                 }
                 
             }
@@ -47,7 +57,7 @@ void listRec(const char *path, int size, char * name)
     closedir(dir);
 }
 
-void listNeRec(const char *path, int size, char * name)
+void listNeRec(const char *path, int size, char * name, int are_num)
 {
     DIR *dir = NULL;
     struct dirent *entry = NULL;
@@ -67,14 +77,22 @@ void listNeRec(const char *path, int size, char * name)
             snprintf(fullPath, 512, "%s/%s", path, entry->d_name);
             if (lstat(fullPath, &statbuf) == 0)
             {
-                if(statbuf.st_size > size)
+                if((statbuf.st_size > size && size != -8))
                 {
-                    printf("%s\n", fullPath);
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                        printf("%s\n", fullPath);
+                    else 
+                    if( are_num == 1)
+                        printf("%s\n", fullPath);
                 }
-
-                if(strcmp(entry->d_name, name) == 0) 
+                else 
+                if( size == -8)
                 {
-                   printf("%s\n", fullPath);
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                        printf("%s\n", fullPath);
+                    else 
+                    if( are_num == 1)
+                        printf("%s\n", fullPath);
                 }
             }
         }
@@ -84,7 +102,7 @@ void listNeRec(const char *path, int size, char * name)
 
 int main(int argc, char **argv)
 {
-    int ok = 0, ok1 = 0, size = 0;//, ok2 = 0, ok3 = 0, ok4 = 0;
+    int ok = 0, ok1 = 0, size = -8, are_num = 1;//, ok2 = 0, ok3 = 0, ok4 = 0;
     char s[101], name[101];
     //name = NULL;
     //strcpy(name,"");
@@ -120,6 +138,7 @@ int main(int argc, char **argv)
         
         if(strncmp(argv[i], "name_starts_with=", 17) == 0) 
         {
+            are_num = 0;
             sscanf(argv[i] + 17, "%s", name);
         }
         
@@ -129,12 +148,12 @@ int main(int argc, char **argv)
         if(ok1 == 1) 
         {
             printf("SUCCESS\n");
-            listRec(s, size, name);
+            listRec(s, size, name, are_num);
         }
         else
         {
             printf("SUCCESS\n");
-            listNeRec(s, size, name);
+            listNeRec(s, size, name, are_num);
         }
     }
     return 0;

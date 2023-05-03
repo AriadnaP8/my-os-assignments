@@ -190,9 +190,172 @@ void parsat(char *path)
     close(fd);
 }
 
+int sectiuni_findall(char *path)
+{
+    off_t fd;
+    fd = open(path,O_RDONLY);
+    if(fd == -1)
+    {
+        perror("Nu s-a putut deschide fisierul.");
+        close(fd);
+        return 2;
+    }
+    lseek(fd, 0, SEEK_SET);
+    // numarul magic
+    char magic = 0;
+    if(read(fd, &magic, 1) != 1 || magic != '8')
+    {
+        close(fd);
+        return 2;
+    }
+    int headerSize = 0;
+    read(fd, &headerSize, 2);
+    // versiunea
+    int version = 0;
+    if(read(fd, &version, 1) != 1 || (version < 109 || version > 213))
+    {
+        close(fd);
+        return 2;
+    }
+    // numarul de sectiuni
+    int nbOfSections = 0;
+    if(read(fd, &nbOfSections, 1) != 1 || (nbOfSections < 3 || nbOfSections > 18))
+    {
+        close(fd);
+        return 2;
+    }
+
+    struct s
+    {
+        char name[21];
+        int type, offset, size;
+    };
+    struct s v[nbOfSections+1];
+    for(int i = 1; i <= nbOfSections; i++)  //initializam vectorul de tipul structurii s cu 0
+    {
+        v[i].type=0;
+        v[i].offset=0;
+        v[i].size=0;
+    }
+    for(int i = 1; i <= nbOfSections; i++)  //parcurgem si citim pe rand in functie de conditii
+    {
+        read(fd, v[i].name, 20);
+        v[i].name[20]='\0'; // am pus asta ca sa nu citeasca caractere random
+        read(fd, &v[i].type, 1);
+        if(v[i].type != 61 && v[i].type != 65 && v[i].type != 69 && v[i].type != 58)
+        {
+            close(fd);
+            return 2;
+        }
+        read(fd, &v[i].offset, 4);
+        read(fd, &v[i].size, 4);
+    }
+
+    int nrLinii = 0;
+    char c;
+    int contor_sectiuni = 0;
+    for (int section = 1; section <= nbOfSections; section++)
+    {
+        nrLinii = 1;
+        lseek(fd, v[section].offset, SEEK_SET);
+        while (read(fd, &c, 1) > 0)
+        {
+            // daca am citit un newline, verificam daca am ajuns la linia dorita
+            if (c == 'OA')// daca caracterul citit e 0A, linia se termina
+            {
+                nrLinii++;
+            }
+        }
+        if(nrLinii > 13)
+        {
+            contor_sectiuni++;
+        }
+        if(contor_sectiuni < 2 ) 
+        {
+            printf("ERROR\ninvalid directory path\n");
+            close(fd);
+            return 1;
+        }
+    }
+
+    close(fd);
+    return 1;
+}
+
+void findall(const char *path, int size, char * name, int are_num, int *OK)
+{
+    DIR *dir = NULL;
+    struct dirent *entry = NULL;
+    char fullPath[512];
+    struct stat statbuf;
+
+    dir = opendir(path);
+    if (dir == NULL)
+    {
+        printf("ERROR\ninvalid directory path\n");
+        return;
+    }
+    
+    if(*OK == 1) 
+    {
+        *OK = 2;
+        printf("SUCCESS\n");
+    }
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+        {
+            snprintf(fullPath, 512, "%s/%s", path, entry->d_name);
+            if (lstat(fullPath, &statbuf) == 0)
+            {
+                // daca s-a introdus un size afisam
+                if((statbuf.st_size > size && size != -8))
+                {
+                    // daca avem numa introdus, comparam ca sa vedem daca numele fisierului incepe cu ceea ce s a introdus
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                    {
+                        if(sectiuni_findall(fullPath) == 1)
+                                 printf("%s\n", fullPath);
+                    }
+                    else 
+                    if( are_num == 1)   // daca nu s a introdus nume, el respecta conditia de size deci afisam
+                    {
+                        if(sectiuni_findall(fullPath) == 1)
+                                 printf("%s\n", fullPath);
+                    }
+                }
+                else 
+                if( size == -8) // daca nu s a introdus size ul
+                {
+                    // comparam iar numele si afisam la fel ca mai sus
+                    if(strncmp(entry->d_name, name, strlen(name)) == 0 && are_num == 0)
+                    {
+                        if(sectiuni_findall(fullPath) == 1)
+                                 printf("%s\n", fullPath);
+                    }
+                    else 
+                    if(are_num == 1)
+                    {
+                        if(sectiuni_findall(fullPath) == 1)
+                                 printf("%s\n", fullPath);
+                    }
+                }
+
+
+                if (S_ISDIR(statbuf.st_mode))
+                {
+                    listRec(fullPath, size, name, are_num, OK);
+                }
+                
+            }
+        }
+    }
+    closedir(dir);
+}
+
 int main(int argc, char **argv)
 {
-    int ok = 0, ok1 = 0, size = -8, are_num = 1, ok_parsare = 0;
+    int ok = 0, ok1 = 0, size = -8, are_num = 1, ok_parsare = 0, ok_findall = 0;
     char s[101], name[101];
     if (argc >= 2)
     {
@@ -229,7 +392,11 @@ int main(int argc, char **argv)
         if(strcmp(argv[i], "parse") == 0)
         {
             ok_parsare = 1;
+        }
 
+        if(strcmp(argv[i], "findall") == 0)
+        {
+            ok_findall = 1;
         }
     }
 
@@ -247,5 +414,6 @@ int main(int argc, char **argv)
     }
     // daca s a introdus in terminal conditia de parsare, apelam functia pentru afisarile necesare
     if(ok_parsare != 0) parsat(s);
+    if(ok_findall != 0) findall(s, size, name, are_num, &OK);
     return 0;
 }

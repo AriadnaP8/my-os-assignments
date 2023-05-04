@@ -3,21 +3,25 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "a2_helper.h"
+
+#define n 40
 
 typedef struct {
     int id;
     int proces;
 }threaduri;
-/*
+
 void *thread_function(void *arg)
 {
     
-    threaduri *thread = (threaduri) arg;
-    info(BEGIN, threaduri.proces, threaduri.id); 
+    threaduri* thread = (threaduri*) arg;
+    info(BEGIN, thread->proces, thread->id); 
 
-    info(END, threaduri.proces, threaduri.id); 
-}*/
+    info(END, thread->proces, thread->id); 
+    return NULL;
+}
 
 
 int main()
@@ -35,6 +39,9 @@ int main()
     pid_t pid8;
     pid_t pid9;
     
+    pthread_t tid[n];
+    threaduri thread_vect[n];
+
     pid2 = fork();
     if(pid2 == 0) {
         info(BEGIN, 2, 0);  // incepe procesul 2
@@ -48,11 +55,31 @@ int main()
     pid3 = fork();
     if(pid3 == 0) {
         info(BEGIN, 3, 0);  // incepe procesul 3
-
+        // creez cele 6 thread-uri din cerinta 5
+        for(int i = 1; i <= 6; i++)
+        {
+            thread_vect[i].id = i;
+            thread_vect[i].proces = 3;
+            pthread_create(&tid[i], NULL, thread_function, &thread_vect[i]);
+        }
+        for(int i = 1; i <= 6; i++)
+        {
+            pthread_join(tid[i], NULL);
+        }
         pid4 = fork();
         if(pid4 == 0) {
             info(BEGIN, 4, 0);  // incepe procesul 4
-
+            // creez cele 35 de thread-uri din cerinta 4
+            for(int i = 1; i <= 35; i++)
+            {
+                thread_vect[i].id = i;
+                thread_vect[i].proces = 4;
+                pthread_create(&tid[i], NULL, thread_function, &thread_vect[i]);
+            }
+            for(int i = 1; i <= 35; i++)
+            {
+                pthread_join(tid[i], NULL);
+            }
             pid7 = fork();
             if(pid7 == 0) {
                 info(BEGIN, 7, 0);  // incepe procesul 7
@@ -87,7 +114,6 @@ int main()
     if(pid5 == 0) {
         info(BEGIN, 5, 0);  // incepe procesul 5
 
-
         wait(NULL);
         info(END, 5, 0);    // se termina procesul 5
         exit(0); // ca sa iasa din proces, sa nu se continue in urmatorul
@@ -105,22 +131,17 @@ int main()
     pid9 = fork();
     if(pid9 == 0) {
         info(BEGIN, 9, 0);  // incepe procesul 9
-
-        //int n = 5;
-        //pthread_t tid[n];
-        //threaduri thread[n];
-        //int i;
-        // vom crea cele n = 5 thread-uri
-        /*for(i = 1; i <= n; i++)
+        // creez cele 5 thread-uri din cerinta 3
+        for(int i = 1; i <= 5; i++)
         {
-            threaduri[i].id = i;
-            threaduri[i].proces = 9;
-            //pthread_create(&tid[i], NULL, thread_function, &threaduri[i]);
+            thread_vect[i].id = i;
+            thread_vect[i].proces = 9;
+            pthread_create(&tid[i], NULL, thread_function, &thread_vect[i]);
         }
-        for(i = 1; i <= n; i++)
+        for(int i = 1; i <= 5; i++)
         {
             pthread_join(tid[i], NULL);
-        }*/
+        }
 
         wait(NULL);
         info(END, 9, 0);    // se termina procesul 9

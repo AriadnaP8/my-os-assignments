@@ -4,6 +4,8 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <semaphore.h>
+
 #include "a2_helper.h"
 
 #define n 40
@@ -13,18 +15,50 @@ typedef struct {
     int proces;
 }threaduri;
 
+sem_t semafor[n];   // vector de semafoare pentru sincronizarea thread-urilor
+
 void *thread_function(void *arg)
 {
     
     threaduri* thread = (threaduri*) arg;
-    info(BEGIN, thread->proces, thread->id); 
 
-    info(END, thread->proces, thread->id); 
+    if(thread->proces == 9)     // veridicam daca procesul in care ne aflam e 9
+    {
+        if(thread->id == 3) // verif daca thread-ul curent e 3
+        {
+            info(BEGIN, thread->proces, thread->id);   
+            sem_post(&semafor[5]);  // crestem val sem
+            sem_wait(&semafor[4]);  // asteptam ca 4 
+            info(END, thread->proces, thread->id);
+        }
+        else 
+            if(thread->id == 5)
+            {
+                sem_wait(&semafor[5]);  // asteapta semnalul de la thread-ul 3 ca sa inceapa sa execute
+                info(BEGIN, thread->proces, thread->id);   
+                info(END, thread->proces, thread->id);
+                sem_post(&semafor[4]);  // deblocam semaforul 4
+            }
+        else 
+            {
+                // asteptam semnalul de la thread-ul 5 pentru a incepe executia
+                info(BEGIN, thread->proces, thread->id);   
+                info(END, thread->proces, thread->id);
+                //sem_wait(&semafor[4]);  // asteapta semnaal de la thread-ul 5 pentru a incepe executia
+            }
+    }
+    else
+    {
+        // restul proceselor care vor fi executate
+        info(BEGIN, thread->proces, thread->id);   
+        info(END, thread->proces, thread->id);
+    }
+
     return NULL;
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
     init();
 
@@ -40,15 +74,21 @@ int main()
     pid_t pid9;
     
     pthread_t tid[n];
-    threaduri thread_vect[n];
+    threaduri thread_vect[n + 1];   // pentru a acoperit toate thread-urile
+
+    // initiallizam semafoarele
+    for(int i = 0; i < n; i++)
+    {
+        sem_init(&semafor[i], 0, 0); // vom initializa cu 0 semafoarele(param3), initial fiind blocat
+        // (param2) va fi 0 tocmai pentru a rezolva cerinta si anume pentru a sincroniza thread-urile in acelasi proces
+    }
 
     pid2 = fork();
     if(pid2 == 0) {
         info(BEGIN, 2, 0);  // incepe procesul 2
 
-
         info(END, 2, 0);    // se termina procesul 2
-        //wait(NULL);
+        wait(NULL);
         exit(0); // ca sa iasa din proces, sa nu se continue in urmatorul
     }
 
@@ -84,13 +124,13 @@ int main()
             if(pid7 == 0) {
                 info(BEGIN, 7, 0);  // incepe procesul 7
 
-
                 info(END, 7, 0);    // se termina procesul 7
-                //wait(NULL);
+                wait(NULL);
                 exit(0); // ca sa iasa din proces, sa nu se continue in urmatorul
             }
 
-            waitpid(pid7, NULL, 0);     // asteapta dupa procesul 7
+            
+            waitpid(pid4, NULL, 0);     // asteapta dupa procesul 8
             info(END, 4, 0);    // se termina procesul 4
             exit(0); // ca sa iasa din proces, sa nu se continue in urmatorul
         }
@@ -153,6 +193,10 @@ int main()
     waitpid(pid5, NULL, 0);     // asteapta dupa procesul 5
     waitpid(pid6, NULL, 0);     // asteapta dupa procesul 6
     waitpid(pid9, NULL, 0);     // asteapta dupa procesul 9
-    info(END, 1, 0);
+
+    sem_destroy(&semafor[4]); // distrugem semaforul corespunzator procesului 1
+    sem_destroy(&semafor[5]); // distrugem semaforul corespunzator procesului 1
+
+    info(END, 1, 0);    // se termina procesul 1
     return 0;
 }

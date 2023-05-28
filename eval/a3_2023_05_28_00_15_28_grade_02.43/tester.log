@@ -1,0 +1,106 @@
+[1;35mTesting ping...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'ECHO'
+[TESTER] received string 'ECHO'
+[TESTER] received number 85866
+[TESTER] received string 'VARIANT'
+[TESTER] sending string 'EXIT'
+Test score: 10 / 10
+[1;35mTesting shm1...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting shm_write...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting map_inexistent...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'MAP_FILE'
+[TESTER] sending string 'test_root/KuJ1p0JnYyVW.Xe6'
+[TESTER] sending string 'EXIT'
+Test score: 1 / 5
+[1;35mTesting map1...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'MAP_FILE'
+[TESTER] sending string 'test_root/b0hW5McTDM.YI5'
+[TESTER] sending string 'EXIT'
+Test score: 1 / 5
+[1;35mTesting read_offset...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting read_section...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting read_logical...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+
+Total score: 17 / 70
+Assignment grade: 24.29 / 100
+[1;35mTesting ping...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'ECHO'
+[TESTER] received string 'ECHO'
+[TESTER] received number 85866
+[TESTER] received string 'VARIANT'
+[TESTER] sending string 'EXIT'
+Test score: 10 / 10
+[1;35mTesting shm1...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting shm_write...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting map_inexistent...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'MAP_FILE'
+[TESTER] sending string 'test_root/KuJ1p0JnYyVW.Xe6'
+[TESTER] sending string 'EXIT'
+Test score: 1 / 5
+[1;35mTesting map1...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'MAP_FILE'
+[TESTER] sending string 'test_root/b0hW5McTDM.YI5'
+[TESTER] sending string 'EXIT'
+Test score: 1 / 5
+[1;35mTesting read_offset...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting read_section...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+[1;35mTesting read_logical...[0m
+[TESTER] received string 'BEGIN'
+[TESTER] sending string 'CREATE_SHM'
+[TESTER] sending number 4913296
+[TESTER] sending string 'EXIT'
+Test score: 1 / 10
+
+Total score: 17 / 70
+Assignment grade: 24.29 / 100

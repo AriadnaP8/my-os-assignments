@@ -1,0 +1,4 @@
+a1.c: In function 'sectiuni_findall':
+a1.c:264:22: warning: multi-character character constant [-Wmultichar]
+  264 |             if (c == 'OA')// daca caracterul citit e 0A, linia se termina
+      |                      ^~~~
